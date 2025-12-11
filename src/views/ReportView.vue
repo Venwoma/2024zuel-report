@@ -6,7 +6,7 @@ import 'swiper/css/effect-creative'
 
 // 引入所有业务组件
 import CanteenSlide from './slides/CanteenSlide.vue'
-import StudySlide from './Slides/Temp.vue'
+import StudySlide from './Slides/StudySlide.vue'
 import SportsSlide from './slides/SportsSlide.vue'
 import InternetSlide from './slides/InternetSlide.vue'
 import PersonaSlide from './slides/PersonaSlide.vue'
