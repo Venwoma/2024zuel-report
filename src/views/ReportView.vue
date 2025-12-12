@@ -5,12 +5,12 @@ import 'swiper/css'
 import 'swiper/css/effect-creative'
 
 // 引入所有业务组件
-import CanteenSlide from './slides/CanteenSlide.vue'
+import CanteenSlide from './Slides/CanteenSlide.vue'
 import StudySlide from './Slides/StudySlide.vue'
-import SportsSlide from './slides/SportsSlide.vue'
-import InternetSlide from './slides/InternetSlide.vue'
-import PersonaSlide from './slides/PersonaSlide.vue'
-import SummarySlide from './slides/SummarySide.vue'
+import SportsSlide from './Slides/SportsSlide.vue'
+import InternetSlide from './Slides/InternetSlide.vue'
+import PersonaSlide from './Slides/PersonaSlide.vue'
+import SummarySlide from './Slides/SummarySide.vue'
 </script>
 
 <template>
