@@ -10,7 +10,7 @@ import StudySlide from './Slides/StudySlide.vue'
 import SportsSlide from './Slides/SportsSlide.vue'
 import InternetSlide from './Slides/InternetSlide.vue'
 import PersonaSlide from './Slides/PersonaSlide.vue'
-import SummarySlide from './Slides/SummarySide.vue'
+import SummarySlide from './Slides/SummarySlide.vue'
 </script>
 
 <template>
