@@ -1,9 +1,35 @@
 <script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { EffectCreative } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/effect-creative'
 
+// 1. 初始化路由（用于跳转到首页）
+const router = useRouter()
+// 2. 存储 Swiper 实例，用于判断当前页码
+const swiperRef = ref(null)
+// 3. 标记是否正在跳转（防止重复触发）
+const isNavigating = ref(false)
+
+// 4. 监听 Swiper 滑动结束事件
+const handleTouchEnd = (swiper) => {
+  // 避免重复跳转
+  if (isNavigating.value) return
+  
+  // 关键判断：
+  // - 当前在第一页（activeIndex === 0）
+  // - 用户向右滑动（swiper.touches.diffX > 0，diffX 为正表示右滑）
+  if (swiper.activeIndex === 0 && swiper.touches.diffX > 20) { // 20 是滑动阈值，避免误触
+    isNavigating.value = true
+    // 跳转到首页（HomeView.vue）
+    router.push('/home').finally(() => {
+      isNavigating.value = false // 跳转完成后重置标记
+    })
+  }
+}
+  
 // 引入所有业务组件
 import CanteenSlide from './Slides/CanteenSlide.vue'
 import StudySlide from './Slides/StudySlide.vue'
@@ -24,6 +50,9 @@ import SummarySlide from './Slides/SummarySlide.vue'
         prev: { shadow: true, translate: ['-20%', 0, -1] },
         next: { translate: ['100%', 0, 0] },
       }"
+      :allow-touch-move="true" // 允许触摸滑动
+      @swiper="(swiper) => swiperRef = swiper" // 保存 Swiper 实例
+      @touchEnd="handleTouchEnd" // 监听滑动结束事件
       class="report-swiper"
     >
       <!-- 2. 食堂篇 -->
