@@ -24,7 +24,7 @@ const handleTouchEnd = (swiper) => {
   if (swiper.activeIndex === 0 && swiper.touches.diffX > 20) { // 20 是滑动阈值，避免误触
     isNavigating.value = true
     // 跳转到首页（HomeView.vue）
-    router.push('/home').finally(() => {
+    router.push('/').finally(() => {
       isNavigating.value = false // 跳转完成后重置标记
     })
   }
