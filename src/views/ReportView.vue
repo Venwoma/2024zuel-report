@@ -6,66 +6,31 @@ import { EffectCreative } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/effect-creative'
 
-// 1. 路由实例
+// 1. 初始化路由（用于跳转到首页）
 const router = useRouter()
-// 2. Swiper 实例
+// 2. 存储 Swiper 实例，用于判断当前页码
 const swiperRef = ref(null)
-// 3. 跳转标记（普通变量，避免作用域问题）
-let isNavigating = false
-// 4. 滑动起始位置
-let startX = 0 
+// 3. 标记是否正在跳转（防止重复触发）
+const isNavigating = ref(false)
 
-// 5. 滑动开始：记录起始位置
-const handleTouchStart = (e) => {
-  startX = e.targetTouches ? e.targetTouches[0].clientX : e.clientX
-  console.log('滑动开始，startX：', startX)
-}
-
-// 6. 滑动结束：核心跳转逻辑
-const handleTouchEnd = (e) => {
-  console.log('===== 滑动结束 =====')
-  console.log('是否在跳转中：', isNavigating)
-  console.log('当前swiper页码：', swiperRef.value?.activeIndex)
+// 4. 监听 Swiper 滑动结束事件
+const handleTouchEnd = (swiper) => {
+  // 避免重复跳转
+  if (isNavigating.value) return
   
-  if (isNavigating) return
-  
-  // 计算滑动距离
-  const endX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX
-  const diffX = endX - startX
-  console.log('滑动起始X：', startX)
-  console.log('滑动结束X：', endX)
-  console.log('滑动距离diffX：', diffX)
-  
-  // 第一页 + 右滑距离>30px 触发跳转
-  const canJump = swiperRef.value?.activeIndex === 0 && diffX > 30
-  console.log('是否满足跳转条件：', canJump)
-  
-  if (canJump) {
-    isNavigating = true
-    // 跳转首页（name 跳转更稳妥）
-    router.push({ name: 'home' })
-      .then(() => {
-        console.log('跳转首页成功！')
-      })
-      .catch((err) => {
-        console.error('跳转失败：', err)
-        // 兜底：原生跳转
-        window.location.href = '/'
-      })
-      .finally(() => {
-        isNavigating = false
-        startX = 0
-      })
+  // 关键判断：
+  // - 当前在第一页（activeIndex === 0）
+  // - 用户向右滑动（swiper.touches.diffX > 0，diffX 为正表示右滑）
+  if (swiper.activeIndex === 0 && swiper.touches.diffX > 20) { // 20 是滑动阈值，避免误触
+    isNavigating.value = true
+    // 跳转到首页（HomeView.vue）
+    router.push('/home').finally(() => {
+      isNavigating.value = false // 跳转完成后重置标记
+    })
   }
 }
-
-// 7. Swiper 初始化
-const initSwiper = (swiper) => {
-  swiperRef.value = swiper
-  console.log('Swiper初始化，当前页码：', swiper.activeIndex)
-}
-
-// 引入业务组件
+  
+// 引入所有业务组件
 import CanteenSlide from './Slides/CanteenSlide.vue'
 import StudySlide from './Slides/StudySlide.vue'
 import SportsSlide from './Slides/SportsSlide.vue'
@@ -85,37 +50,50 @@ import SummarySlide from './Slides/SummarySlide.vue'
         prev: { shadow: true, translate: ['-20%', 0, -1] },
         next: { translate: ['100%', 0, 0] },
       }"
-      :allow-touch-move="true"
-      :allow-slide-prev="false"
-      @swiper="initSwiper"
-      @touchstart="handleTouchStart"
-      @mousedown="handleTouchStart"
-      @touchend="handleTouchEnd"
-      @mouseup="handleTouchEnd"
+      :allow-touch-move="true" 
+      @swiper="(swiper) => swiperRef = swiper" 
+      @touchEnd="handleTouchEnd" 
       class="report-swiper"
     >
+      <!-- 2. 食堂篇 -->
       <swiper-slide class="bg-canteen">
         <CanteenSlide />
       </swiper-slide>
-      <swiper-slide class="bg-study"><StudySlide /></swiper-slide>
-      <swiper-slide class="bg-sports"><SportsSlide /></swiper-slide>
-      <swiper-slide class="bg-internet"><InternetSlide /></swiper-slide>
-      <swiper-slide class="bg-persona"><PersonaSlide /></swiper-slide>
-      <swiper-slide class="bg-summary"><SummarySlide /></swiper-slide>
+
+      <!-- 3. 上课篇 -->
+      <swiper-slide class="bg-study">
+        <StudySlide />
+      </swiper-slide>
+
+      <!-- 4. 运动篇 -->
+      <swiper-slide class="bg-sports">
+        <SportsSlide />
+      </swiper-slide>
+
+      <!-- 5. 上网篇 -->
+      <swiper-slide class="bg-internet">
+        <InternetSlide />
+      </swiper-slide>
+
+      <!-- 6. 人物形象 -->
+      <swiper-slide class="bg-persona">
+        <PersonaSlide />
+      </swiper-slide>
+
+      <!-- 7. 总结 -->
+      <swiper-slide class="bg-summary">
+        <SummarySlide />
+      </swiper-slide>
+
     </swiper>
   </div>
 </template>
 
 <style scoped>
-.report-container { 
-  width: 100vw; 
-  height: 100vh; 
-  overflow: hidden; 
-  touch-action: pan-x;
-}
+.report-container { width: 100vw; height: 100vh; overflow: hidden; }
 .report-swiper { width: 100%; height: 100%; }
 
-/* 背景样式 */
+/* 定义每一页的专属背景色 */
 .bg-canteen { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
 .bg-study { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
 .bg-sports { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
