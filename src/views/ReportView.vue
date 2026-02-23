@@ -10,19 +10,18 @@ import 'swiper/css/effect-creative'
 const router = useRouter()
 // 2. Swiper 实例
 const swiperRef = ref(null)
-// 3. 跳转标记
-let isNavigating = false // 改用 let，避免 ref 响应式导致的作用域问题
-// 4. 滑动起始位置（改用普通变量，彻底解决未定义问题）
+// 3. 跳转标记（普通变量，避免作用域问题）
+let isNavigating = false
+// 4. 滑动起始位置
 let startX = 0 
 
-// 5. 滑动开始：记录起始位置（确保变量赋值正确）
+// 5. 滑动开始：记录起始位置
 const handleTouchStart = (e) => {
-  // 兼容移动端/PC端
   startX = e.targetTouches ? e.targetTouches[0].clientX : e.clientX
-  console.log('滑动开始，startX：', startX) // 验证赋值
+  console.log('滑动开始，startX：', startX)
 }
 
-// 6. 滑动结束：核心逻辑（修复 startX 未定义）
+// 6. 滑动结束：核心跳转逻辑
 const handleTouchEnd = (e) => {
   console.log('===== 滑动结束 =====')
   console.log('是否在跳转中：', isNavigating)
@@ -30,37 +29,37 @@ const handleTouchEnd = (e) => {
   
   if (isNavigating) return
   
-  // 计算滑动结束位置和距离
+  // 计算滑动距离
   const endX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX
-  const diffX = endX - startX // 现在 startX 已定义，不会报错
+  const diffX = endX - startX
   console.log('滑动起始X：', startX)
   console.log('滑动结束X：', endX)
   console.log('滑动距离diffX：', diffX)
   
-  // 关键判断：第一页 + 右滑距离>30px（降低阈值，提高触发概率）
+  // 第一页 + 右滑距离>30px 触发跳转
   const canJump = swiperRef.value?.activeIndex === 0 && diffX > 30
   console.log('是否满足跳转条件：', canJump)
   
   if (canJump) {
     isNavigating = true
-    // 跳转首页（用 name 跳转，最稳妥）
+    // 跳转首页（name 跳转更稳妥）
     router.push({ name: 'home' })
       .then(() => {
         console.log('跳转首页成功！')
       })
       .catch((err) => {
         console.error('跳转失败：', err)
-        // 兜底：原生跳转，确保能回去
+        // 兜底：原生跳转
         window.location.href = '/'
       })
       .finally(() => {
         isNavigating = false
-        startX = 0 // 重置起始位置
+        startX = 0
       })
   }
 }
 
-// 7. Swiper 初始化：确保实例正确获取
+// 7. Swiper 初始化
 const initSwiper = (swiper) => {
   swiperRef.value = swiper
   console.log('Swiper初始化，当前页码：', swiper.activeIndex)
@@ -87,7 +86,8 @@ import SummarySlide from './Slides/SummarySlide.vue'
         next: { translate: ['100%', 0, 0] },
       }"
       :allow-touch-move="true"
-      :allow-slide-prev="false" 
+      <!-- 注释写在单独行，且用英文注释，避免打包报错 -->
+      :allow-slide-prev="false"
       @swiper="initSwiper"
       @touchstart="handleTouchStart"
       @mousedown="handleTouchStart"
@@ -112,7 +112,7 @@ import SummarySlide from './Slides/SummarySlide.vue'
   width: 100vw; 
   height: 100vh; 
   overflow: hidden; 
-  touch-action: pan-x; /* 允许水平滑动，避免浏览器拦截 */
+  touch-action: pan-x;
 }
 .report-swiper { width: 100%; height: 100%; }
 
