@@ -87,9 +87,8 @@ import SummarySlide from './Slides/SummarySlide.vue'
         next: { translate: ['100%', 0, 0] },
       }"
       :allow-touch-move="true"
-      :allow-slide-prev="false" <!-- 禁止第一页左滑，避免Swiper拦截右滑 -->
-      @swiper="initSwiper" <!-- 初始化Swiper实例 -->
-      <!-- 监听原生滑动事件（绕过Swiper的事件拦截） -->
+      :allow-slide-prev="false" 
+      @swiper="initSwiper"
       @touchstart="handleTouchStart"
       @mousedown="handleTouchStart"
       @touchend="handleTouchEnd"
