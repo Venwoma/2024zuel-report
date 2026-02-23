@@ -50,9 +50,9 @@ import SummarySlide from './Slides/SummarySlide.vue'
         prev: { shadow: true, translate: ['-20%', 0, -1] },
         next: { translate: ['100%', 0, 0] },
       }"
-      :allow-touch-move="true" // 允许触摸滑动
-      @swiper="(swiper) => swiperRef = swiper" // 保存 Swiper 实例
-      @touchEnd="handleTouchEnd" // 监听滑动结束事件
+      :allow-touch-move="true" 
+      @swiper="(swiper) => swiperRef = swiper" 
+      @touchEnd="handleTouchEnd" 
       class="report-swiper"
     >
       <!-- 2. 食堂篇 -->
