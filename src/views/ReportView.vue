@@ -86,7 +86,6 @@ import SummarySlide from './Slides/SummarySlide.vue'
         next: { translate: ['100%', 0, 0] },
       }"
       :allow-touch-move="true"
-      <!-- 注释写在单独行，且用英文注释，避免打包报错 -->
       :allow-slide-prev="false"
       @swiper="initSwiper"
       @touchstart="handleTouchStart"
