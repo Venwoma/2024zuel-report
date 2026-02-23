@@ -13,19 +13,30 @@ const swiperRef = ref(null)
 // 3. 标记是否正在跳转（防止重复触发）
 const isNavigating = ref(false)
 
-// 4. 监听 Swiper 滑动结束事件
-const handleTouchEnd = (swiper) => {
-  // 避免重复跳转
+  const handleTouchEnd = (e) => {
+  console.log('===== 滑动结束 =====')
+  console.log('是否在跳转中：', isNavigating.value)
+  console.log('当前swiper页码：', swiperRef.value?.activeIndex)
+  console.log('滑动起始X：', startX.value)
+  console.log('滑动结束X：', e.changedTouches ? e.changedTouches[0].clientX : e.clientX)
+  console.log('滑动距离diffX：', (e.changedTouches ? e.changedTouches[0].clientX : e.clientX) - startX.value)
+  
   if (isNavigating.value) return
   
-  // 关键判断：
-  // - 当前在第一页（activeIndex === 0）
-  // - 用户向右滑动（swiper.touches.diffX > 0，diffX 为正表示右滑）
-  if (swiper.activeIndex === 0 && swiper.touches.diffX > 20) { // 20 是滑动阈值，避免误触
+  const endX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX
+  const diffX = endX - startX.value
+  
+  console.log('是否满足跳转条件：', swiperRef.value?.activeIndex === 0 && diffX > 50)
+  
+  if (swiperRef.value?.activeIndex === 0 && diffX > 50) {
     isNavigating.value = true
-    // 跳转到首页（HomeView.vue）
-    router.push('/').finally(() => {
-      isNavigating.value = false // 跳转完成后重置标记
+    console.log('开始跳转首页...')
+    router.push({ name: 'home' }).then(() => {
+      console.log('跳转成功！')
+    }).catch((err) => {
+      console.error('跳转失败：', err) // 关键：看路由跳转是否报错
+    }).finally(() => {
+      isNavigating.value = false
     })
   }
 }
