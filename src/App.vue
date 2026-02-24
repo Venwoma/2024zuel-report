@@ -5,6 +5,9 @@ import { RouterView } from 'vue-router'
 const audioRef = ref(null)
 const isPlaying = ref(false)
 
+const baseUrl = import.meta.env.VITE_BASE_URL || '/';
+const bgmUrl = baseUrl + 'bgm.mp3';
+
 const toggleMusic = () => {
   if (audioRef.value) {
     isPlaying.value ? audioRef.value.pause() : audioRef.value.play()
@@ -26,7 +29,7 @@ const startMusic = () => {
     <div class="music-control" @click="toggleMusic">
       <div class="music-icon" :class="{ rotating: isPlaying }">🎵</div>
     </div>
-    <audio ref="audioRef" loop src="/bgm.mp3"></audio>
+    <audio ref="audioRef" loop :src="bgmUrl"></audio>
 
     <!-- 路由展示区：切换 首页 和 账单页 -->
     <!-- 监听子组件发出的 start-music 事件 -->

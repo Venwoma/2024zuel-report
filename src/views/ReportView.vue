@@ -1,36 +1,63 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { EffectCreative } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/effect-creative'
 
-// 1. 初始化路由（用于跳转到首页）
 const router = useRouter()
-// 2. 存储 Swiper 实例，用于判断当前页码
-const swiperRef = ref(null)
-// 3. 标记是否正在跳转（防止重复触发）
 const isNavigating = ref(false)
+const startX = ref(0)
+const swipeDistance = ref(0) // 当前滑动距离
 
-// 4. 监听 Swiper 滑动结束事件
-const handleTouchEnd = (swiper) => {
-  // 避免重复跳转
-  if (isNavigating.value) return
-  
-  // 关键判断：
-  // - 当前在第一页（activeIndex === 0）
-  // - 用户向右滑动（swiper.touches.diffX > 0，diffX 为正表示右滑）
-  if (swiper.activeIndex === 0 && swiper.touches.diffX > 20) { // 20 是滑动阈值，避免误触
-    isNavigating.value = true
-    // 跳转到首页（HomeView.vue）
-    router.push('/home').finally(() => {
-      isNavigating.value = false // 跳转完成后重置标记
-    })
+// 控制提示遮罩显示/透明度
+const showSwipeHint = computed(() => swipeDistance.value > 10)
+const hintOpacity = computed(() => Math.min(swipeDistance.value / 100, 0.9))
+
+// 触摸开始
+const handleTouchStart = (swiper, event) => {
+  if (!event.touches || event.touches.length === 0) return
+  startX.value = event.touches[0].clientX
+  swipeDistance.value = 0
+}
+
+// 触摸移动，用于滑动提示
+const handleTouchMove = (swiper, event) => {
+  if (!event.touches || event.touches.length === 0) return
+  const currentX = event.touches[0].clientX
+  const diff = currentX - startX.value
+
+  // 仅第一页向右滑时显示提示
+  if (swiper.activeIndex === 0 && diff > 0) {
+    swipeDistance.value = diff
+  } else {
+    swipeDistance.value = 0
   }
 }
-  
-// 引入所有业务组件
+
+// 触摸结束
+const handleTouchEnd = (swiper, event) => {
+  if (!event.changedTouches || event.changedTouches.length === 0) return
+  const endX = event.changedTouches[0].clientX
+  const diff = endX - startX.value
+
+  // 重置滑动提示
+  swipeDistance.value = 0
+
+  if (isNavigating.value) return
+
+  // 满足返回条件
+  if (swiper.activeIndex === 0 && diff > 80) {
+    isNavigating.value = true
+    router.replace('/').finally(() => {
+      isNavigating.value = false
+    })
+  }
+  startX.value = 0
+}
+
+// 引入业务组件
 import CanteenSlide from './Slides/CanteenSlide.vue'
 import StudySlide from './Slides/StudySlide.vue'
 import SportsSlide from './Slides/SportsSlide.vue'
@@ -41,6 +68,16 @@ import SummarySlide from './Slides/SummarySlide.vue'
 
 <template>
   <div class="report-container">
+    <!-- 滑动提示遮罩 -->
+    <div
+      class="swipe-hint"
+      v-if="showSwipeHint"
+      :style="{ opacity: hintOpacity }"
+    >
+      <div class="arrow">←</div>
+      <div class="text">向右滑动返回首页</div>
+    </div>
+
     <swiper
       :modules="[EffectCreative]"
       :slides-per-view="1"
@@ -50,50 +87,78 @@ import SummarySlide from './Slides/SummarySlide.vue'
         prev: { shadow: true, translate: ['-20%', 0, -1] },
         next: { translate: ['100%', 0, 0] },
       }"
-      :allow-touch-move="true" 
-      @swiper="(swiper) => swiperRef = swiper" 
-      @touchEnd="handleTouchEnd" 
+      :resistanceRatio="0.85"
+      @touchStart="handleTouchStart"
+      @touchMove="handleTouchMove"
+      @touchEnd="handleTouchEnd"
       class="report-swiper"
     >
-      <!-- 2. 食堂篇 -->
       <swiper-slide class="bg-canteen">
         <CanteenSlide />
       </swiper-slide>
 
-      <!-- 3. 上课篇 -->
       <swiper-slide class="bg-study">
         <StudySlide />
       </swiper-slide>
 
-      <!-- 4. 运动篇 -->
       <swiper-slide class="bg-sports">
         <SportsSlide />
       </swiper-slide>
 
-      <!-- 5. 上网篇 -->
       <swiper-slide class="bg-internet">
         <InternetSlide />
       </swiper-slide>
 
-      <!-- 6. 人物形象 -->
       <swiper-slide class="bg-persona">
         <PersonaSlide />
       </swiper-slide>
 
-      <!-- 7. 总结 -->
       <swiper-slide class="bg-summary">
         <SummarySlide />
       </swiper-slide>
-
     </swiper>
   </div>
 </template>
 
 <style scoped>
-.report-container { width: 100vw; height: 100vh; overflow: hidden; }
-.report-swiper { width: 100%; height: 100%; }
+.report-container {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
 
-/* 定义每一页的专属背景色 */
+.report-swiper {
+  width: 100%;
+  height: 100%;
+}
+
+/* 滑动提示遮罩 */
+.swipe-hint {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.2); /* 半透明遮罩 */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 20px;
+  transition: opacity 0.2s;
+  pointer-events: none;
+  z-index: 10;
+  font-size: 18px;
+  color: white;
+  font-weight: bold;
+}
+
+.swipe-hint .arrow {
+  font-size: 36px;
+  margin-right: 10px;
+}
+
+/* 背景色 */
 .bg-canteen { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
 .bg-study { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
 .bg-sports { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
